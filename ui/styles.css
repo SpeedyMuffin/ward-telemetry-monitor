@@ -191,6 +191,12 @@ body {
     background-color: #212c3b;
 }
 
+.btn-lang {
+    font-family: var(--font-num);
+    min-width: 40px;
+    text-align: center;
+}
+
 .btn-primary-solid {
     background-color: var(--accent-blue);
     border-color: #3b8ad1;

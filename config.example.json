@@ -2,7 +2,7 @@
   "bind_host": "127.0.0.1",
   "http_port": 8090,
   "mqtt_broker": "127.0.0.1:1883",
-  "mqtt_topic": "hl7/#",
+  "mqtt_topic": "telemetry/#",
   "xml_bridge_addr": "",
   "xml_username": "",
   "xml_password_hash": "",

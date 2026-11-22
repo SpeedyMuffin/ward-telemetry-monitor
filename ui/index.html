@@ -10,26 +10,26 @@
     <!-- TAM EKRAN DONANIM LİSANS KİLİDİ -->
     <div class="license-lock-overlay" id="licenseLockOverlay" style="display: none;">
         <div class="license-lock-card">
-            <div class="lock-header-tag">ERİŞİM KİLİTLİ</div>
-            <h2>MERKEZİ İZLEM — LİSANS DOĞRULAMA</h2>
-            <p class="lock-reason-text" id="lockReasonText">Lisans doğrulanıyor...</p>
+            <div class="lock-header-tag" data-i18n="lockHeaderTag">ERİŞİM KİLİTLİ</div>
+            <h2 data-i18n="lockTitle">MERKEZİ İZLEM — LİSANS DOĞRULAMA</h2>
+            <p class="lock-reason-text" id="lockReasonText" data-i18n="lockReasonDefault">Lisans doğrulanıyor...</p>
 
             <div class="hwid-display-box">
-                <span class="hwid-label">CİHAZ DONANIM KİMLİĞİ (HWID)</span>
+                <span class="hwid-label" data-i18n="lockHwidLabel">CİHAZ DONANIM KİMLİĞİ (HWID)</span>
                 <div class="hwid-code-row">
                     <code id="lockHwidCode">---</code>
-                    <button type="button" class="btn-ctrl btn-accent" id="btnCopyHwid">KOPYALA</button>
+                    <button type="button" class="btn-ctrl btn-accent" id="btnCopyHwid" data-i18n="btnCopy">KOPYALA</button>
                 </div>
             </div>
 
             <form id="unlockLicenseForm" class="lock-form">
-                <label>LİSANS ANAHTARI (WTMKEY-...)</label>
-                <textarea id="unlockKeyInput" rows="3" placeholder="Aktivasyon anahtarını giriniz..." required></textarea>
-                <button type="submit" class="btn-ctrl btn-accent btn-unlock">LİSANSI ETKİNLEŞTİR</button>
+                <label data-i18n="lockKeyLabel">LİSANS ANAHTARI (WTMKEY-...)</label>
+                <textarea id="unlockKeyInput" rows="3" placeholder="Aktivasyon anahtarını giriniz..." data-i18n-placeholder="lockKeyPlaceholder" required></textarea>
+                <button type="submit" class="btn-ctrl btn-accent btn-unlock" data-i18n="btnUnlockLicense">LİSANSI ETKİNLEŞTİR</button>
             </form>
 
             <div class="lock-footer-contact">
-                <span>Ekrandaki Cihaz Kodu (HWID) lisans üreticisine yapıştırılarak aktivasyon anahtarı üretilir.</span>
+                <span data-i18n="lockFooter">Ekrandaki Cihaz Kodu (HWID) lisans üreticisine yapıştırılarak aktivasyon anahtarı üretilir.</span>
             </div>
         </div>
     </div>
@@ -46,19 +46,19 @@
             </div>
 
             <div class="conn-group">
-                <div class="status-tag disconnected" id="backendStatusPill" title="TCP/XML Köprü Bağlantısı (config.json)">
+                <div class="status-tag disconnected" id="backendStatusPill" title="TCP/XML Bridge (config.json)">
                     <span class="ind-dot"></span>
                     <span id="backendStatusText">XML KÖPRÜ: KAPALI</span>
                 </div>
-                <div class="status-tag disconnected" id="mqttStatusPill" title="MQTT Broker Bağlantısı (config.json)">
+                <div class="status-tag disconnected" id="mqttStatusPill" title="MQTT Broker (config.json)">
                     <span class="ind-dot"></span>
                     <span id="mqttStatusText">MQTT: BEKLİYOR</span>
                 </div>
-                <div class="status-tag" id="comStatusPill" title="Doğrudan Seri Port (COM)">
+                <div class="status-tag" id="comStatusPill" title="Direct Serial Port (COM)">
                     <span class="ind-dot"></span>
                     <span id="comStatusText">COM PORT: 0 AKTİF</span>
                 </div>
-                <button class="status-tag license-tag" id="btnLicenseBadge" title="Donanım Lisans Bilgisi">
+                <button class="status-tag license-tag" id="btnLicenseBadge" title="License Info">
                     <span id="licenseBadgeText">LİSANS: KONTROL</span>
                 </button>
             </div>
@@ -67,10 +67,11 @@
         <div class="header-right">
             <div class="alarm-box normal" id="alarmPill">
                 <span id="alarmCountText">0 ALARM</span>
-                <button class="btn-mute" id="btnAudioMute" title="Sesli Alarm Aç/Kapat">SES: AÇIK</button>
+                <button class="btn-mute" id="btnAudioMute">SES: AÇIK</button>
             </div>
 
-            <button class="btn-ctrl btn-accent" id="btnOpenAdminPanel">ADMİN PANELİ</button>
+            <button class="btn-ctrl btn-lang" id="btnToggleLang" title="Dil / Language">EN</button>
+            <button class="btn-ctrl btn-accent" id="btnOpenAdminPanel" data-i18n="btnAdminPanel">ADMİN PANELİ</button>
 
             <div class="clock-display">
                 <span class="clock-time" id="digitalClock">--:--:--</span>
@@ -82,23 +83,23 @@
     <!-- MODÜL SEKMELERİ VE ODA FİLTRESİ -->
     <nav class="module-nav-bar">
         <div class="module-tabs" id="moduleTabs">
-            <button class="mod-tab active" data-view="ward">SERVİS İZLEM</button>
-            <button class="mod-tab" data-view="map">YERLEŞİM PLANI</button>
-            <button class="mod-tab" data-view="drugs">İLAÇ KÜTÜPHANESİ (DERS)</button>
-            <button class="mod-tab" data-view="history">OLAY KAYITLARI</button>
-            <button class="mod-tab" data-view="reports">KLİNİK RAPORLAR</button>
-            <button class="mod-tab" data-view="admin" id="tabAdmin">YÖNETİM (ADMİN)</button>
+            <button class="mod-tab active" data-view="ward" data-i18n="tabWard">SERVİS İZLEM</button>
+            <button class="mod-tab" data-view="map" data-i18n="tabMap">YERLEŞİM PLANI</button>
+            <button class="mod-tab" data-view="drugs" data-i18n="tabDrugs">İLAÇ KÜTÜPHANESİ (DERS)</button>
+            <button class="mod-tab" data-view="history" data-i18n="tabHistory">OLAY KAYITLARI</button>
+            <button class="mod-tab" data-view="reports" data-i18n="tabReports">KLİNİK RAPORLAR</button>
+            <button class="mod-tab" data-view="admin" id="tabAdmin" data-i18n="tabAdmin">YÖNETİM (ADMİN)</button>
         </div>
 
         <div class="room-tabs" id="roomTabs">
-            <button class="room-tab active" data-room="ALL">TÜMÜ <span class="tab-badge" id="totalBedsBadge">0</span></button>
+            <button class="room-tab active" data-room="ALL"><span data-i18n="roomAll">TÜMÜ</span> <span class="tab-badge" id="totalBedsBadge">0</span></button>
         </div>
     </nav>
 
     <!-- AKTİF ALARM ŞERİDİ -->
     <div class="alarms-banner-container" id="alarmsBanner" style="display: none;">
         <div class="alarms-banner-content">
-            <span class="alarm-prefix">AKTİF ALARM:</span>
+            <span class="alarm-prefix" data-i18n="alarmPrefix">AKTİF ALARM:</span>
             <div class="alarm-text-list" id="alarmBannerList"></div>
         </div>
     </div>
@@ -115,10 +116,10 @@
             <div class="section-panel">
                 <div class="panel-header-bar">
                     <div>
-                        <h2>SERVİS YERLEŞİM PLANI</h2>
-                        <p class="section-desc">Tanımlı yatakların konumları ve anlık infüzyon durumları. Detay için yatağa tıklayın.</p>
+                        <h2 data-i18n="mapTitle">SERVİS YERLEŞİM PLANI</h2>
+                        <p class="section-desc" data-i18n="mapDesc">Tanımlı yatakların konumları ve anlık infüzyon durumları. Detay için yatağa tıklayın.</p>
                     </div>
-                    <button class="btn-ctrl btn-accent" onclick="window.app.openAdminSection('wards')">SERVİS / YATAK DÜZENLE (ADMİN)</button>
+                    <button class="btn-ctrl btn-accent" onclick="window.app.openAdminSection('wards')" data-i18n="btnEditWardsAdmin">SERVİS / YATAK DÜZENLE (ADMİN)</button>
                 </div>
                 <div class="ward-floor-canvas" id="wardFloorCanvas"></div>
             </div>
@@ -129,22 +130,22 @@
             <div class="section-panel">
                 <div class="panel-header-bar">
                     <div>
-                        <h2>İLAÇ KÜTÜPHANESİ VE DOZ LİMİTLERİ (DERS)</h2>
-                        <p class="section-desc">Canlı cihazlardan gelen infüzyon hızları bu tablodaki alt ve üst sınırlarla otomatik denetlenir.</p>
+                        <h2 data-i18n="drugsTitle">İLAÇ KÜTÜPHANESİ VE DOZ LİMİTLERİ (DERS)</h2>
+                        <p class="section-desc" data-i18n="drugsDesc">Canlı cihazlardan gelen infüzyon hızları bu tablodaki alt ve üst sınırlarla otomatik denetlenir.</p>
                     </div>
-                    <button class="btn-ctrl btn-primary-solid" id="btnEditDrugsInAdmin">ADMİN İLE DÜZENLE</button>
+                    <button class="btn-ctrl btn-primary-solid" id="btnEditDrugsInAdmin" data-i18n="btnEditDrugsAdmin">ADMİN İLE DÜZENLE</button>
                 </div>
                 <div class="table-container">
                     <table class="clinical-table">
                         <thead>
                             <tr>
-                                <th>İLAÇ ADI</th>
-                                <th>KATEGORİ</th>
-                                <th>KONSANTRASYON</th>
-                                <th>SOFT MİN</th>
-                                <th>SOFT MAX</th>
-                                <th>HARD MAX</th>
-                                <th>BİRİM</th>
+                                <th data-i18n="thDrugName">İLAÇ ADI</th>
+                                <th data-i18n="thCategory">KATEGORİ</th>
+                                <th data-i18n="thConc">KONSANTRASYON</th>
+                                <th data-i18n="thSoftMin">SOFT MİN</th>
+                                <th data-i18n="thSoftMax">SOFT MAX</th>
+                                <th data-i18n="thHardMax">HARD MAX</th>
+                                <th data-i18n="thUnit">BİRİM</th>
                             </tr>
                         </thead>
                         <tbody id="drugsTableBody"></tbody>
@@ -158,31 +159,31 @@
             <div class="section-panel">
                 <div class="panel-header-bar">
                     <div>
-                        <h2>GERÇEK OLAY VE ALARM ARŞİVİ</h2>
-                        <p class="section-desc">Cihaz bağlantıları, pompa durum değişimleri, alarmlar ve hasta kayıt hareketleri.</p>
+                        <h2 data-i18n="historyTitle">GERÇEK OLAY VE ALARM ARŞİVİ</h2>
+                        <p class="section-desc" data-i18n="historyDesc">Cihaz bağlantıları, pompa durum değişimleri, alarmlar ve hasta kayıt hareketleri.</p>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <select id="historySeverityFilter" class="compact-select">
-                            <option value="ALL">TÜM KAYITLAR</option>
-                            <option value="HIGH">KRİTİK ALARMLAR</option>
-                            <option value="INFO">SİSTEM BİLGİLERİ</option>
+                            <option value="ALL" data-i18n="optAllLogs">TÜM KAYITLAR</option>
+                            <option value="HIGH" data-i18n="optHighLogs">KRİTİK ALARMLAR</option>
+                            <option value="INFO" data-i18n="optInfoLogs">SİSTEM BİLGİLERİ</option>
                         </select>
-                        <button class="btn-ctrl" id="btnRefreshHistory">YENİLE</button>
-                        <a class="btn-ctrl btn-primary-solid" href="/api/history/export_csv" style="text-decoration: none;">CSV DIŞA AKTAR</a>
+                        <button class="btn-ctrl" id="btnRefreshHistory" data-i18n="btnRefresh">YENİLE</button>
+                        <a class="btn-ctrl btn-primary-solid" href="/api/history/export_csv" style="text-decoration: none;" data-i18n="btnExportCsv">CSV DIŞA AKTAR</a>
                     </div>
                 </div>
                 <div class="table-container">
                     <table class="clinical-table">
                         <thead>
                             <tr>
-                                <th>TARİH / SAAT</th>
-                                <th>YATAK</th>
-                                <th>CİHAZ / PORT</th>
-                                <th>OLAY</th>
-                                <th>SEVİYE</th>
-                                <th>AÇIKLAMA</th>
-                                <th>HIZ</th>
-                                <th>HACİM</th>
+                                <th data-i18n="thDateTime">TARİH / SAAT</th>
+                                <th data-i18n="thBed">YATAK</th>
+                                <th data-i18n="thDevicePort">CİHAZ / PORT</th>
+                                <th data-i18n="thEvent">OLAY</th>
+                                <th data-i18n="thSeverity">SEVİYE</th>
+                                <th data-i18n="thDesc">AÇIKLAMA</th>
+                                <th data-i18n="thRate">HIZ</th>
+                                <th data-i18n="thVolume">HACİM</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody"></tbody>
@@ -196,30 +197,31 @@
             <div class="section-panel">
                 <div class="panel-header-bar">
                     <div>
-                        <h2>KLİNİK SIVI DENGESİ VE CQI RAPORLARI</h2>
-                        <p class="section-desc">Yalnızca bağlı aktif gerçek pompalardan hesaplanan servis geneli veriler.</p>
+                        <h2 data-i18n="reportsTitle">KLİNİK SIVI DENGESİ VE CQI RAPORLARI</h2>
+                        <p class="section-desc" data-i18n="reportsDesc">Yalnızca bağlı aktif gerçek pompalardan hesaplanan servis geneli veriler.</p>
                     </div>
-                    <button class="btn-ctrl btn-primary-solid" id="btnRefreshReports">RAPORU YENİLE</button>
+                    <button class="btn-ctrl btn-primary-solid" id="btnRefreshReports" data-i18n="btnRefreshReports">RAPORU YENİLE</button>
                 </div>
                 <div id="reportsContainer"></div>
             </div>
         </div>
+
         <!-- GÖRÜNÜM 6: YÖNETİM PANELİ (ADMİN) -->
         <div class="view-section" id="view-admin" style="display: none;">
             <div class="admin-login-wrap" id="adminLoginBox">
                 <div class="admin-login-card">
-                    <h2>YÖNETİCİ PANELİ GİRİŞİ</h2>
-                    <p class="section-desc" style="margin-bottom: 14px;">Kurum ayarları, servis/yatak tanımları, cihaz portları ve DERS ilaç kuralları şifre ile korunmaktadır.</p>
+                    <h2 data-i18n="adminLoginTitle">YÖNETİCİ PANELİ GİRİŞİ</h2>
+                    <p class="section-desc" style="margin-bottom: 14px;" data-i18n="adminLoginDesc">Kurum ayarları, servis/yatak tanımları, cihaz portları ve DERS ilaç kuralları şifre ile korunmaktadır.</p>
                     <form id="adminLoginForm" class="modal-form">
                         <div class="form-row">
-                            <label>Yönetici Şifresi:</label>
-                            <input type="password" id="adminLoginPassword" placeholder="Şifrenizi giriniz..." required>
+                            <label data-i18n="lblAdminPass">Yönetici Şifresi:</label>
+                            <input type="password" id="adminLoginPassword" placeholder="Şifrenizi giriniz..." data-i18n-placeholder="phAdminPass" required>
                         </div>
-                        <button type="submit" class="btn-ctrl btn-primary-solid">GİRİŞ YAP</button>
+                        <button type="submit" class="btn-ctrl btn-primary-solid" data-i18n="btnAdminLogin">GİRİŞ YAP</button>
                     </form>
                     <div class="admin-feedback err" id="adminLoginError"></div>
-                    <div class="admin-default-hint" id="adminDefaultPassHint" style="display: none;">
-                        İlk kurulum varsayılan şifresi: <code>admin1234</code> — Giriş yaptıktan sonra değiştirmeniz önerilir.
+                    <div class="admin-default-hint" id="adminDefaultPassHint" style="display: none;" data-i18n="adminDefaultHint">
+                        İlk kurulum varsayılan şifresi: admin1234 — Giriş yaptıktan sonra değiştirmeniz önerilir.
                     </div>
                 </div>
             </div>
@@ -227,64 +229,64 @@
             <div class="section-panel" id="adminWorkspace" style="display: none;">
                 <div class="admin-topbar">
                     <div>
-                        <h2>YÖNETİCİ PANELİ</h2>
-                        <p class="section-desc">Kurum başlığı, yatak yapılandırması, fiziksel cihaz bağlantıları ve sistem güvenliği</p>
+                        <h2 data-i18n="adminPanelTitle">YÖNETİCİ PANELİ</h2>
+                        <p class="section-desc" data-i18n="adminPanelDesc">Kurum başlığı, yatak yapılandırması, fiziksel cihaz bağlantıları ve sistem güvenliği</p>
                     </div>
                     <div class="admin-topbar-actions">
-                        <span class="status-tag"><span class="ind-dot"></span>OTURUM AÇIK</span>
-                        <button type="button" class="btn-ctrl" id="btnAdminLogout">OTURUMU KİLİTLE</button>
+                        <span class="status-tag"><span class="ind-dot"></span><span data-i18n="adminSessionOpen">OTURUM AÇIK</span></span>
+                        <button type="button" class="btn-ctrl" id="btnAdminLogout" data-i18n="btnAdminLogout">OTURUMU KİLİTLE</button>
                     </div>
                 </div>
 
-                <div class="admin-warn-banner" id="adminDefaultPassWarn" style="display: none;">
-                    Güvenlik Uyarısı: Hâlâ varsayılan yönetici şifresini (<code>admin1234</code>) kullanıyorsunuz. Lütfen aşağıdaki <strong>Kurum &amp; Güvenlik</strong> sekmesinden şifrenizi değiştirin.
+                <div class="admin-warn-banner" id="adminDefaultPassWarn" style="display: none;" data-i18n="adminDefaultWarn">
+                    Güvenlik Uyarısı: Hâlâ varsayılan yönetici şifresini (admin1234) kullanıyorsunuz. Lütfen "Kurum &amp; Güvenlik" sekmesinden şifreyi değiştirin.
                 </div>
 
                 <div class="admin-subtabs" id="adminSubtabs">
-                    <button type="button" class="admin-subtab active" data-subtab="general">Kurum &amp; Güvenlik</button>
-                    <button type="button" class="admin-subtab" data-subtab="wards">Servis &amp; Yataklar</button>
-                    <button type="button" class="admin-subtab" data-subtab="devices">Cihaz &amp; Portlar</button>
-                    <button type="button" class="admin-subtab" data-subtab="drugs">DERS İlaç Kuralları</button>
-                    <button type="button" class="admin-subtab" data-subtab="license">Lisans</button>
+                    <button type="button" class="admin-subtab active" data-subtab="general" data-i18n="subtabGeneral">Kurum &amp; Güvenlik</button>
+                    <button type="button" class="admin-subtab" data-subtab="wards" data-i18n="subtabWards">Servis &amp; Yataklar</button>
+                    <button type="button" class="admin-subtab" data-subtab="devices" data-i18n="subtabDevices">Cihaz &amp; Portlar</button>
+                    <button type="button" class="admin-subtab" data-subtab="drugs" data-i18n="subtabDrugs">DERS İlaç Kuralları</button>
+                    <button type="button" class="admin-subtab" data-subtab="license" data-i18n="subtabLicense">Lisans</button>
                 </div>
 
                 <!-- ALT SEKME 1: KURUM & GÜVENLİK -->
                 <div class="admin-pane" id="admin-pane-general">
                     <div class="bed-detail-grid">
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">KURUM VE ÜST BAŞLIK BİLGİLERİ</h4>
-                            <p class="section-desc" style="margin-bottom: 12px;">Tanımladığınız kurum adı ve birim alt başlığı tüm istasyon üst barında ve tarayıcı başlığında gösterilir.</p>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secFacilityTitle">KURUM VE ÜST BAŞLIK BİLGİLERİ</h4>
+                            <p class="section-desc" style="margin-bottom: 12px;" data-i18n="secFacilityDesc">Tanımladığınız kurum adı ve birim alt başlığı tüm istasyon üst barında ve tarayıcı başlığında gösterilir.</p>
                             <form id="adminFacilityForm" class="modal-form">
                                 <div class="form-row">
-                                    <label>Kullanılacak Kurum / Hastane Adı:</label>
-                                    <input type="text" id="adminFacilityInput" maxlength="100" placeholder="Örn: İzmir Şehir Hastanesi">
+                                    <label data-i18n="lblFacilityName">Kullanılacak Kurum / Hastane Adı:</label>
+                                    <input type="text" id="adminFacilityInput" maxlength="100" placeholder="Örn: İzmir Şehir Hastanesi" data-i18n-placeholder="phFacilityName">
                                 </div>
                                 <div class="form-row">
-                                    <label>Birim / Servis Alt Başlığı:</label>
-                                    <input type="text" id="adminDepartmentInput" maxlength="100" placeholder="Örn: 3. Basamak Genel Yoğun Bakım">
+                                    <label data-i18n="lblDepartmentName">Birim / Servis Alt Başlığı:</label>
+                                    <input type="text" id="adminDepartmentInput" maxlength="100" placeholder="Örn: 3. Basamak Genel Yoğun Bakım" data-i18n-placeholder="phDepartmentName">
                                 </div>
-                                <button type="submit" class="btn-ctrl btn-primary-solid">BAŞLIĞI KAYDET</button>
+                                <button type="submit" class="btn-ctrl btn-primary-solid" data-i18n="btnSaveFacility">BAŞLIĞI KAYDET</button>
                                 <div class="admin-feedback" id="adminFacilityMsg"></div>
                             </form>
                         </div>
 
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">YÖNETİCİ ŞİFRESİ DEĞİŞTİR</h4>
-                            <p class="section-desc" style="margin-bottom: 12px;">Yeni şifre tuzlanmış 10.000 turlu SHA-256 özeti olarak saklanır.</p>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secPasswordTitle">YÖNETİCİ ŞİFRESİ DEĞİŞTİR</h4>
+                            <p class="section-desc" style="margin-bottom: 12px;" data-i18n="secPasswordDesc">Yeni şifre tuzlanmış 10.000 turlu SHA-256 özeti olarak saklanır.</p>
                             <form id="adminPasswordForm" class="modal-form">
                                 <div class="form-row">
-                                    <label>Mevcut Şifre:</label>
+                                    <label data-i18n="lblCurPass">Mevcut Şifre:</label>
                                     <input type="password" id="adminCurPass" required>
                                 </div>
                                 <div class="form-row">
-                                    <label>Yeni Şifre (en az 6 karakter):</label>
+                                    <label data-i18n="lblNewPass">Yeni Şifre (en az 6 karakter):</label>
                                     <input type="password" id="adminNewPass" minlength="6" required>
                                 </div>
                                 <div class="form-row">
-                                    <label>Yeni Şifre (Tekrar):</label>
+                                    <label data-i18n="lblNewPass2">Yeni Şifre (Tekrar):</label>
                                     <input type="password" id="adminNewPass2" minlength="6" required>
                                 </div>
-                                <button type="submit" class="btn-ctrl btn-accent">ŞİFREYİ GÜNCELLE</button>
+                                <button type="submit" class="btn-ctrl btn-accent" data-i18n="btnUpdatePass">ŞİFREYİ GÜNCELLE</button>
                                 <div class="admin-feedback" id="adminPasswordMsg"></div>
                             </form>
                         </div>
@@ -295,37 +297,37 @@
                 <div class="admin-pane" id="admin-pane-wards" style="display: none;">
                     <div class="bed-detail-grid">
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">1. YENİ SERVİS / ODA EKLE</h4>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secAddRoomTitle">1. YENİ SERVİS / ODA EKLE</h4>
                             <form id="addRoomForm" class="modal-form">
                                 <div class="form-row">
-                                    <label>Servis / Oda Adı:</label>
-                                    <input type="text" id="newRoomNameInput" placeholder="Örn: Anestezi Yoğun Bakım 1" required>
+                                    <label data-i18n="lblRoomName">Servis / Oda Adı:</label>
+                                    <input type="text" id="newRoomNameInput" placeholder="Örn: Anestezi Yoğun Bakım 1" data-i18n-placeholder="phRoomName" required>
                                 </div>
-                                <button type="submit" class="btn-ctrl btn-primary-solid">+ SERVİS EKLE</button>
+                                <button type="submit" class="btn-ctrl btn-primary-solid" data-i18n="btnAddRoom">+ SERVİS EKLE</button>
                             </form>
                             <hr style="border-color: #1e293b; margin: 16px 0;">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">2. YENİ YATAK EKLE</h4>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secAddBedTitle">2. YENİ YATAK EKLE</h4>
                             <form id="addBedForm" class="modal-form">
                                 <div class="form-row">
-                                    <label>Bağlı Olduğu Servis:</label>
+                                    <label data-i18n="lblTargetRoom">Bağlı Olduğu Servis:</label>
                                     <select id="newBedRoomSelect" required></select>
                                 </div>
                                 <div class="form-row">
-                                    <label>Yatak Kodu / Adı:</label>
-                                    <input type="text" id="newBedNameInput" placeholder="Örn: 01, YATAK-01, YB-04" required>
+                                    <label data-i18n="lblBedName">Yatak Kodu / Adı:</label>
+                                    <input type="text" id="newBedNameInput" placeholder="Örn: 01, YATAK-01, YB-04" data-i18n-placeholder="phBedName" required>
                                 </div>
-                                <button type="submit" class="btn-ctrl btn-accent">+ YATAK EKLE</button>
+                                <button type="submit" class="btn-ctrl btn-accent" data-i18n="btnAddBed">+ YATAK EKLE</button>
                             </form>
                         </div>
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">TANIMLI SERVİS VE YATAKLAR</h4>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secDefinedWardsTitle">TANIMLI SERVİS VE YATAKLAR</h4>
                             <div class="table-container" style="max-height: 400px; overflow-y: auto;">
                                 <table class="clinical-table">
                                     <thead>
                                         <tr>
-                                            <th>SERVİS</th>
-                                            <th>YATAK</th>
-                                            <th>İŞLEM</th>
+                                            <th data-i18n="thService">SERVİS</th>
+                                            <th data-i18n="thBed">YATAK</th>
+                                            <th data-i18n="thAction">İŞLEM</th>
                                         </tr>
                                     </thead>
                                     <tbody id="wardBedsManageBody"></tbody>
@@ -338,19 +340,19 @@
                 <!-- ALT SEKME 3: CİHAZ & PORTLAR -->
                 <div class="admin-pane" id="admin-pane-devices" style="display: none;">
                     <div class="report-box" style="margin-bottom: 14px;">
-                        <h4 style="margin-bottom: 10px; color: #38bdf8;">AKTİF YATAK-CİHAZ EŞLEŞTİRMELERİ (<span id="activeMappingsCount">0</span>)</h4>
+                        <h4 style="margin-bottom: 10px; color: #38bdf8;"><span data-i18n="secActiveMappingsTitle">AKTİF YATAK-CİHAZ EŞLEŞTİRMELERİ</span> (<span id="activeMappingsCount">0</span>)</h4>
                         <div class="table-container">
                             <table class="clinical-table">
                                 <thead>
                                     <tr>
-                                        <th>YATAK</th>
-                                        <th>YÖNTEM</th>
-                                        <th>ADRES / PORT</th>
-                                        <th>MODEL</th>
-                                        <th>ETİKET / İLAÇ</th>
-                                        <th>SON VERİ</th>
-                                        <th>DURUM</th>
-                                        <th>İŞLEM</th>
+                                        <th data-i18n="thBed">YATAK</th>
+                                        <th data-i18n="thMethod">YÖNTEM</th>
+                                        <th data-i18n="thAddressPort">ADRES / PORT</th>
+                                        <th data-i18n="thModel">MODEL</th>
+                                        <th data-i18n="thLabelDrug">ETİKET / İLAÇ</th>
+                                        <th data-i18n="thLastData">SON VERİ</th>
+                                        <th data-i18n="thStatus">DURUM</th>
+                                        <th data-i18n="thAction">İŞLEM</th>
                                     </tr>
                                 </thead>
                                 <tbody id="mappingsTableBody"></tbody>
@@ -360,78 +362,76 @@
 
                     <div class="bed-detail-grid">
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">+ CİHAZ / PORT BAĞLA</h4>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secBindDeviceTitle">+ CİHAZ / PORT BAĞLA</h4>
                             <form id="saveMappingForm" class="modal-form">
                                 <div class="form-row grid-2">
                                     <div>
-                                        <label>Hedef Yatak:</label>
+                                        <label data-i18n="lblTargetBed">Hedef Yatak:</label>
                                         <select id="mapBedSelect" required></select>
                                     </div>
                                     <div>
-                                        <label>Fiziksel Bağlantı Yöntemi:</label>
+                                        <label data-i18n="lblConnMethod">Fiziksel Bağlantı Yöntemi:</label>
                                         <select id="mapSourceTypeSelect" required>
-                                            <option value="PI_IP">[GW] Uç Ağ Geçidi (IP / Port 1-4)</option>
-                                            <option value="DIRECT_COM">[COM] Doğrudan PC USB/RS232 Portu (Örn: COM3)</option>
-                                            <option value="DOCK_IP">[DOK] LAN Dok İstasyonu (TCP/XML)</option>
-                                            <option value="PUMP_SN">[SN] Fiziksel Pompa Seri Numarası</option>
+                                            <option value="GATEWAY" data-i18n="optSourceGateway">[GW] Uç Ağ Geçidi (MQTT / Kanal)</option>
+                                            <option value="DIRECT_COM" data-i18n="optSourceCom">[COM] Doğrudan PC USB/RS232 Portu</option>
+                                            <option value="DOCK_IP" data-i18n="optSourceDock">[DOK] LAN Dok İstasyonu (TCP/XML)</option>
+                                            <option value="PUMP_SN" data-i18n="optSourceSn">[SN] Fiziksel Pompa Seri Numarası</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="form-row">
-                                    <label id="lblMapAddress">Kaynak Adresi (Örn: 192.168.1.50 veya 192.168.1.50:PORT1):</label>
-                                    <input type="text" id="mapAddressInput" placeholder="192.168.1.50 veya COM3" required>
-                                    <small class="form-hint" id="hintMapAddress">
-                                        Tekli ağ geçidi için sadece IP (192.168.1.50), çoklu port için IP:PORT yazabilir ya da ağ geçidi üzerinden PV1 yatak kodu gönderebilirsiniz.
-                                    </small>
+                                    <label id="lblMapAddress">Kaynak Adresi:</label>
+                                    <input type="text" id="mapAddressInput" placeholder="gw-01:CH1 veya COM3" required>
+                                    <small class="form-hint" id="hintMapAddress"></small>
                                 </div>
                                 <div class="form-row grid-2">
                                     <div>
-                                        <label>Pompa Modeli:</label>
+                                        <label data-i18n="lblDeviceModel">Pompa Modeli:</label>
                                         <select id="mapModelSelect">
-                                            <option value="Enjektör Pompası">Enjektör Pompası</option>
-                                            <option value="Volumetrik Pompa">Volumetrik Pompa</option>
-                                            <option value="PCA Pompası">PCA Pompası</option>
-                                            <option value="Çok Kanallı Pompa">Çok Kanallı Pompa</option>
+                                            <option value="Enjektör Pompası" data-i18n="optModelSyringe">Enjektör Pompası</option>
+                                            <option value="Volumetrik Pompa" data-i18n="optModelVol">Volumetrik Pompa</option>
+                                            <option value="PCA Pompası" data-i18n="optModelPca">PCA Pompası</option>
+                                            <option value="Çok Kanallı Pompa" data-i18n="optModelMulti">Çok Kanallı Pompa</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label>Bağlantı Etiketi:</label>
-                                        <input type="text" id="mapLabelInput" placeholder="Örn: Yatak 1 Pompa Hattı">
+                                        <label data-i18n="lblConnLabel">Bağlantı Etiketi:</label>
+                                        <input type="text" id="mapLabelInput" placeholder="Örn: Yatak 1 Pompa Hattı" data-i18n-placeholder="phConnLabel">
                                     </div>
                                 </div>
                                 <div class="form-row grid-2">
                                     <div>
-                                        <label>İlaç Adı:</label>
-                                        <input type="text" id="mapDrugName" placeholder="Örn: Noradrenalin">
+                                        <label data-i18n="lblDrugName">İlaç Adı:</label>
+                                        <input type="text" id="mapDrugName" placeholder="Örn: Noradrenalin" data-i18n-placeholder="phDrugName">
                                     </div>
                                     <div>
-                                        <label>Konsantrasyon / Doz:</label>
-                                        <input type="text" id="mapDrugConc" placeholder="Örn: 4 mg / 50 ml">
+                                        <label data-i18n="lblDrugConc">Konsantrasyon / Doz:</label>
+                                        <input type="text" id="mapDrugConc" placeholder="Örn: 4 mg / 50 ml" data-i18n-placeholder="phDrugConc">
                                     </div>
                                 </div>
                                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                    <button type="button" class="btn-ctrl" id="btnResetMappingForm">TEMİZLE</button>
-                                    <button type="submit" class="btn-ctrl btn-primary-solid">KAYDET VE YATAĞA BAĞLA</button>
+                                    <button type="button" class="btn-ctrl" id="btnResetMappingForm" data-i18n="btnClear">TEMİZLE</button>
+                                    <button type="submit" class="btn-ctrl btn-primary-solid" data-i18n="btnSaveMapping">KAYDET VE YATAĞA BAĞLA</button>
                                 </div>
                             </form>
                         </div>
 
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">AĞDAKİ UÇ AĞ GEÇİTLERİ (<span id="discoveredPisCount">0</span>)</h4>
-                            <p class="section-desc" style="margin-bottom: 10px;">Yapılandırılmış MQTT Broker üzerinden (<code>hl7/#</code>) aktif veri gönderen cihazlar:</p>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;"><span data-i18n="secDiscoveredGatewaysTitle">AĞDAKİ UÇ AĞ GEÇİTLERİ</span> (<span id="discoveredGatewaysCount">0</span>)</h4>
+                            <p class="section-desc" style="margin-bottom: 10px;"><span data-i18n="secDiscoveredGatewaysDesc">Yapılandırılmış MQTT Broker üzerinden aktif telemetri gönderen cihazlar</span> (<code>telemetry/#</code>):</p>
                             <div class="table-container" style="max-height: 380px; overflow-y: auto;">
                                 <table class="clinical-table">
                                     <thead>
                                         <tr>
-                                            <th>IP / KANAL</th>
-                                            <th>SON SİNYAL</th>
-                                            <th>SINIFLANDIRMA</th>
-                                            <th>SON HL7 ÖZETİ</th>
-                                            <th>BAĞLI YATAK</th>
-                                            <th>İŞLEM</th>
+                                            <th data-i18n="thGwAddr">AĞ GEÇİDİ</th>
+                                            <th data-i18n="thLastSignal">SON SİNYAL</th>
+                                            <th data-i18n="thClass">SINIFLANDIRMA</th>
+                                            <th data-i18n="thLastPayload">SON VERİ ÖZETİ</th>
+                                            <th data-i18n="thBoundBed">BAĞLI YATAK</th>
+                                            <th data-i18n="thAction">İŞLEM</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="discoveredPisTableBody"></tbody>
+                                    <tbody id="discoveredGatewaysTableBody"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -442,51 +442,51 @@
                 <div class="admin-pane" id="admin-pane-drugs" style="display: none;">
                     <div class="bed-detail-grid">
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">+ DERS İLAÇ KURALI EKLE</h4>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secAddDrugTitle">+ DERS İLAÇ KURALI EKLE</h4>
                             <form id="addDrugForm" class="modal-form">
                                 <div class="form-row grid-2">
                                     <div>
-                                        <label>İlaç Adı:</label>
-                                        <input type="text" id="drugNameInput" placeholder="Örn: Adrenalin" required>
+                                        <label data-i18n="lblDrugName">İlaç Adı:</label>
+                                        <input type="text" id="drugNameInput" placeholder="Örn: Adrenalin" data-i18n-placeholder="phDrugName" required>
                                     </div>
                                     <div>
-                                        <label>Kategori:</label>
+                                        <label data-i18n="lblCategory">Kategori:</label>
                                         <input type="text" id="drugCategoryInput" value="Vazopressör">
                                     </div>
                                 </div>
                                 <div class="form-row">
-                                    <label>Standart Konsantrasyon:</label>
-                                    <input type="text" id="drugConcInput" placeholder="Örn: 4 mg / 50 ml">
+                                    <label data-i18n="lblStdConc">Standart Konsantrasyon:</label>
+                                    <input type="text" id="drugConcInput" placeholder="Örn: 4 mg / 50 ml" data-i18n-placeholder="phDrugConc">
                                 </div>
                                 <div class="form-row grid-2">
                                     <div>
-                                        <label>Soft Alt Limit (ml/h):</label>
+                                        <label data-i18n="lblSoftMin">Soft Alt Limit (ml/h):</label>
                                         <input type="number" id="drugSoftMinInput" step="0.1" value="0.5" required>
                                     </div>
                                     <div>
-                                        <label>Soft Üst Limit (ml/h):</label>
+                                        <label data-i18n="lblSoftMax">Soft Üst Limit (ml/h):</label>
                                         <input type="number" id="drugSoftMaxInput" step="0.1" value="25.0" required>
                                     </div>
                                 </div>
                                 <div class="form-row">
-                                    <label>Hard Üst Limit (ml/h):</label>
+                                    <label data-i18n="lblHardMax">Hard Üst Limit (ml/h):</label>
                                     <input type="number" id="drugHardMaxInput" step="0.1" value="50.0" required>
                                 </div>
-                                <button type="submit" class="btn-ctrl btn-primary-solid">İLAÇ KURALINI KAYDET</button>
+                                <button type="submit" class="btn-ctrl btn-primary-solid" data-i18n="btnSaveDrugRule">İLAÇ KURALINI KAYDET</button>
                                 <div class="admin-feedback" id="adminDrugMsg"></div>
                             </form>
                         </div>
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">TANIMLI DERS KURALLARI</h4>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secExistingDrugsTitle">TANIMLI DERS KURALLARI</h4>
                             <div class="table-container" style="max-height: 400px; overflow-y: auto;">
                                 <table class="clinical-table">
                                     <thead>
                                         <tr>
-                                            <th>İLAÇ</th>
-                                            <th>KATEGORİ</th>
-                                            <th>SOFT</th>
-                                            <th>HARD MAX</th>
-                                            <th>İŞLEM</th>
+                                            <th data-i18n="thDrugName">İLAÇ</th>
+                                            <th data-i18n="thCategory">KATEGORİ</th>
+                                            <th data-i18n="thSoftRange">SOFT</th>
+                                            <th data-i18n="thHardMax">HARD MAX</th>
+                                            <th data-i18n="thAction">İŞLEM</th>
                                         </tr>
                                     </thead>
                                     <tbody id="adminDrugsTableBody"></tbody>
@@ -500,17 +500,17 @@
                 <div class="admin-pane" id="admin-pane-license" style="display: none;">
                     <div class="bed-detail-grid">
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">LİSANS VE DONANIM KİLİDİ DURUMU</h4>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secLicenseStatusTitle">LİSANS VE DONANIM KİLİDİ DURUMU</h4>
                             <div id="adminLicenseBody"></div>
                         </div>
                         <div class="report-box">
-                            <h4 style="margin-bottom: 10px; color: #38bdf8;">YENİ LİSANS ANAHTARI ETKİNLEŞTİR</h4>
+                            <h4 style="margin-bottom: 10px; color: #38bdf8;" data-i18n="secLicenseUpdateTitle">YENİ LİSANS ANAHTARI ETKİNLEŞTİR</h4>
                             <form id="adminActivateLicenseForm" class="modal-form">
                                 <div class="form-row">
-                                    <label>Lisans Anahtarı (WTMKEY-...):</label>
+                                    <label data-i18n="lockKeyLabel">Lisans Anahtarı (WTMKEY-...):</label>
                                     <textarea id="adminLicenseKeyInput" rows="4" placeholder="WTMKEY-..." required></textarea>
                                 </div>
-                                <button type="submit" class="btn-ctrl btn-accent">LİSANSI GÜNCELLE</button>
+                                <button type="submit" class="btn-ctrl btn-accent" data-i18n="btnUnlockLicense">LİSANSI GÜNCELLE</button>
                                 <div class="admin-feedback" id="adminLicenseMsg"></div>
                             </form>
                         </div>
@@ -525,8 +525,8 @@
         <div class="modal-card modal-card-wide">
             <div class="modal-header">
                 <div class="modal-header-title">
-                    <h3 id="bedDetailTitle">YATAK BAŞI İSTASYONU</h3>
-                    <p class="modal-header-sub" id="bedDetailSub">Hasta bilgileri ve cihaz kanalları</p>
+                    <h3 id="bedDetailTitle" data-i18n="modalBedTitle">YATAK BAŞI İSTASYONU</h3>
+                    <p class="modal-header-sub" id="bedDetailSub" data-i18n="modalBedSub">Hasta bilgileri ve cihaz kanalları</p>
                 </div>
                 <button class="modal-close" id="btnCloseBedDetailModal">&times;</button>
             </div>
@@ -538,7 +538,7 @@
     <div class="modal-backdrop" id="licenseInfoModal" style="display: none;">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>LİSANS VE DONANIM KİLİDİ</h3>
+                <h3 data-i18n="modalLicenseTitle">LİSANS VE DONANIM KİLİDİ</h3>
                 <button class="modal-close" id="btnCloseLicenseModal">&times;</button>
             </div>
             <div class="modal-body" id="licenseInfoBody"></div>
@@ -547,10 +547,10 @@
 
     <footer class="app-footer">
         <div class="footer-left">
-            <span>MERKEZİ İZLEM • MQTT / HL7 v2 • TCP/XML • DIRECT COM</span>
+            <span data-i18n="footerLeft">WARD TELEMETRY MONITOR • MQTT / HL7 v2 • TCP/XML • DIRECT COM</span>
         </div>
         <div class="footer-right">
-            <span>DONANIM KİLİTLİ ENDÜSTRİYEL İZLEM İSTASYONU</span>
+            <span data-i18n="footerRight">DONANIM KİLİTLİ ENDÜSTRİYEL İZLEM İSTASYONU</span>
         </div>
     </footer>
 

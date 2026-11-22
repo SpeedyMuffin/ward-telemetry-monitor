@@ -37,7 +37,7 @@ pub struct Bed {
 pub struct DeviceMapping {
     pub id: String,
     pub bed_name: String,
-    pub source_type: String, // PI_IP, DIRECT_COM, DOCK_IP, PUMP_SN
+    pub source_type: String, // GATEWAY, DIRECT_COM, DOCK_IP, PUMP_SN
     pub address: String,
     pub model: String,
     pub label: String,
@@ -119,8 +119,8 @@ pub struct EventLog {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DiscoveredPi {
-    pub ip: String,
+pub struct DiscoveredGateway {
+    pub address: String,
     pub last_seen: i64,
     pub topic: String,
     pub device_type: String,
@@ -168,7 +168,7 @@ pub struct FullSnapshot {
     pub rooms: Vec<Room>,
     pub beds: Vec<BedSnapshot>,
     pub mappings: Vec<DeviceMapping>,
-    pub discovered_pis: Vec<DiscoveredPi>,
+    pub discovered_gateways: Vec<DiscoveredGateway>,
     pub drug_library: Vec<DrugRule>,
     pub pumps_count: usize,
     pub alarms_count: usize,
@@ -199,7 +199,7 @@ pub struct StateStore {
     pub structure: WardStructureFile,
     pub pumps: HashMap<String, PumpState>,
     pub mappings: Vec<DeviceMapping>,
-    pub discovered_pis: HashMap<String, DiscoveredPi>,
+    pub discovered_gateways: HashMap<String, DiscoveredGateway>,
     pub drug_library: Vec<DrugRule>,
     pub event_logs: Vec<EventLog>,
     pub patients_by_bed: HashMap<String, PatientInfo>,
@@ -262,7 +262,7 @@ impl StateStore {
             structure,
             pumps: HashMap::new(),
             mappings,
-            discovered_pis: HashMap::new(),
+            discovered_gateways: HashMap::new(),
             drug_library,
             event_logs,
             patients_by_bed,
@@ -415,7 +415,7 @@ impl StateStore {
                 rooms: Vec::new(),
                 beds: Vec::new(),
                 mappings: Vec::new(),
-                discovered_pis: Vec::new(),
+                discovered_gateways: Vec::new(),
                 drug_library: Vec::new(),
                 pumps_count: 0,
                 alarms_count: 0,
@@ -455,8 +455,8 @@ impl StateStore {
         }
 
         let all_alarms: Vec<AlarmInfo> = pumps_enriched.iter().filter_map(|p| p.alarm.clone()).collect();
-        let mut disc_list: Vec<DiscoveredPi> = self
-            .discovered_pis
+        let mut disc_list: Vec<DiscoveredGateway> = self
+            .discovered_gateways
             .values()
             .map(|d| {
                 let mut dc = d.clone();
@@ -464,7 +464,7 @@ impl StateStore {
                 dc.mapped_bed = self
                     .mappings
                     .iter()
-                    .find(|m| m.address == dc.ip || m.address.starts_with(&format!("{}:", dc.ip)))
+                    .find(|m| m.address == dc.address || m.address.starts_with(&format!("{}:", dc.address)))
                     .map(|m| m.bed_name.clone());
                 dc
             })
@@ -481,7 +481,7 @@ impl StateStore {
             rooms: self.structure.rooms.clone(),
             beds: beds_out,
             mappings: self.mappings.clone(),
-            discovered_pis: disc_list,
+            discovered_gateways: disc_list,
             drug_library: self.drug_library.clone(),
             pumps_count: pumps_enriched.len(),
             alarms_count: all_alarms.len(),
@@ -489,23 +489,23 @@ impl StateStore {
         }
     }
 
-    pub fn handle_hl7_message(&mut self, topic: &str, payload: &str) {
-        let parts: Vec<&str> = topic.split('/').collect();
-        if parts.len() < 2 || parts[0] != "hl7" {
+    pub fn handle_telemetry_message(&mut self, topic: &str, payload: &str) {
+        let parts: Vec<&str> = topic.split('/').filter(|s| !s.is_empty()).collect();
+        if parts.len() < 2 {
             return;
         }
-        let pi_ip = parts[1].to_string();
-        let sub_id = if parts.len() >= 3 { parts[2].to_string() } else { "DEFAULT".to_string() };
+        let gateway_id = parts[1].to_string();
+        let channel_id = if parts.len() >= 3 { parts[2].to_string() } else { "CH1".to_string() };
         let now = license::now_unix();
 
         let parsed = parse_hl7_packet(payload);
         let (dev_type, dev_label) = classify_hl7_device(&parsed, payload, topic);
 
         let clean_snippet: String = payload.chars().take(110).map(|c| if c == '\r' || c == '\n' { ' ' } else { c }).collect();
-        self.discovered_pis.insert(
-            pi_ip.clone(),
-            DiscoveredPi {
-                ip: pi_ip.clone(),
+        self.discovered_gateways.insert(
+            gateway_id.clone(),
+            DiscoveredGateway {
+                address: gateway_id.clone(),
                 last_seen: now,
                 topic: topic.to_string(),
                 device_type: dev_type.clone(),
@@ -520,23 +520,22 @@ impl StateStore {
             return;
         }
 
-        // Match either exact IP:SUB_ID, plain PI_IP, or PV1 bed tag match!
-        let combined_addr = format!("{}:{}", pi_ip, sub_id.to_uppercase());
+        // Match either exact GW:CH, plain GW address, or PV1 bed identifier
+        let combined_addr = format!("{}:{}", gateway_id, channel_id.to_uppercase());
         let pv1_bed_clean = parsed.pv1_bed.split('^').last().unwrap_or("").trim().to_string();
-        let pv1_stripped = pv1_bed_clean.strip_prefix("BED_").unwrap_or(&pv1_bed_clean);
 
         let mut matched_idx = None;
         for (i, m) in self.mappings.iter().enumerate() {
-            if m.source_type == "PI_IP" {
-                if m.address.eq_ignore_ascii_case(&combined_addr) || m.address == pi_ip {
-                    matched_idx = Some(i);
-                    break;
-                }
+            if m.source_type == "GATEWAY"
+                && (m.address.eq_ignore_ascii_case(&combined_addr) || m.address.eq_ignore_ascii_case(&gateway_id))
+            {
+                matched_idx = Some(i);
+                break;
             }
         }
-        if matched_idx.is_none() && !pv1_stripped.is_empty() {
+        if matched_idx.is_none() && !pv1_bed_clean.is_empty() {
             for (i, m) in self.mappings.iter().enumerate() {
-                if m.bed_name.eq_ignore_ascii_case(pv1_stripped) {
+                if m.bed_name.eq_ignore_ascii_case(&pv1_bed_clean) {
                     matched_idx = Some(i);
                     break;
                 }
@@ -551,8 +550,8 @@ impl StateStore {
             self.mappings[idx].last_seen = now;
             self.mappings[idx].is_online = true;
 
-            let pump_key = format!("PUMP-PI-{}-{}", pi_ip, sub_id);
-            let serial_id = format!("GW-{}-{}", pi_ip.split('.').last().unwrap_or("0"), sub_id);
+            let pump_key = format!("PUMP-GW-{}-{}", gateway_id, channel_id);
+            let serial_id = format!("GW-{}-{}", gateway_id.split('.').last().unwrap_or(&gateway_id), channel_id);
             let pump_model = if model_override.is_empty() { dev_label } else { model_override };
 
             let prev = self.last_alarm_states.get(&pump_key).cloned();
@@ -572,8 +571,8 @@ impl StateStore {
                 PumpState {
                     id: pump_key,
                     bed_name,
-                    source_type: "PI_IP".into(),
-                    source_address: pi_ip,
+                    source_type: "GATEWAY".into(),
+                    source_address: gateway_id,
                     model: pump_model.clone(),
                     serial: serial_id,
                     slot: 1,
@@ -775,4 +774,56 @@ pub fn classify_hl7_device(parsed: &ParsedHl7, payload: &str, topic: &str) -> (S
     }
 
     ("OTHER_DEVICE".into(), "Diğer Cihaz".into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_generic_telemetry_topic_and_hl7_payload() {
+        let mut st = StateStore {
+            connected_to_xml: false,
+            connected_to_mqtt: false,
+            admin: crate::admin::AdminState::new_in_memory_for_test(),
+            structure: WardStructureFile { rooms: Vec::new(), beds: Vec::new(), next_id: 1 },
+            pumps: HashMap::new(),
+            mappings: vec![DeviceMapping {
+                id: "map-YB-01".into(),
+                bed_name: "YB-01".into(),
+                source_type: "GATEWAY".into(),
+                address: "gw-01:CH1".into(),
+                model: String::new(),
+                label: String::new(),
+                drug_name: "Noradrenalin".into(),
+                drug_concentration: "4 mg / 50 ml".into(),
+                created_at: 0,
+                last_seen: 0,
+                is_online: false,
+            }],
+            discovered_gateways: HashMap::new(),
+            drug_library: default_drug_library(),
+            event_logs: Vec::new(),
+            patients_by_bed: HashMap::new(),
+            volume_offsets: HashMap::new(),
+            last_alarm_states: HashMap::new(),
+            license_status: license::get_license_status(true),
+            last_license_tick: 0,
+            event_seq: 1,
+        };
+
+        let hl7 = "MSH|^~\\&|INFUSION_GW|ICU||20261122||ORU^R01|1|P|2.5\rPV1||I|ICU^01^YB-01\rOBX|1|NM|RATE||12.5|ml/h\rOBX|2|NM|VOL_INF||45.0|ml\rOBX|3|NM|VTBI||500.0|ml\rOBX|4|ST|STATUS||INFUSING\r";
+        st.handle_telemetry_message("telemetry/gw-01/ch1", hl7);
+
+        let gw = st.discovered_gateways.get("gw-01").expect("gateway recorded");
+        assert_eq!(gw.address, "gw-01");
+        assert_eq!(gw.device_type, "INFUSION_PUMP");
+
+        let pump = st.pumps.get("PUMP-GW-gw-01-ch1").expect("mapped pump inserted");
+        assert_eq!(pump.bed_name, "YB-01");
+        assert_eq!(pump.source_type, "GATEWAY");
+        assert_eq!(pump.status, "INFUSING");
+        assert!((pump.rate - 12.5).abs() < 1e-6);
+        assert!((pump.volume_infused - 45.0).abs() < 1e-6);
+    }
 }

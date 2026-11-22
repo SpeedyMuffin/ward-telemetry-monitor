@@ -21,7 +21,7 @@ impl Default for AppConfig {
             bind_host: "127.0.0.1".to_string(),
             http_port: 8090,
             mqtt_broker: String::new(),
-            mqtt_topic: "hl7/#".to_string(),
+            mqtt_topic: "telemetry/#".to_string(),
             xml_bridge_addr: String::new(),
             xml_username: String::new(),
             xml_password_hash: String::new(),

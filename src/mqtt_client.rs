@@ -82,7 +82,7 @@ pub fn spawn_mqtt_worker(state: Arc<Mutex<StateStore>>, cfg: AppConfig) {
         return;
     }
     let topic_filter = if cfg.mqtt_topic.trim().is_empty() {
-        "hl7/#".to_string()
+        "telemetry/#".to_string()
     } else {
         cfg.mqtt_topic.trim().to_string()
     };
@@ -96,7 +96,7 @@ pub fn spawn_mqtt_worker(state: Arc<Mutex<StateStore>>, cfg: AppConfig) {
         match TcpStream::connect_timeout(&sock_addr, Duration::from_secs(4)) {
             Ok(mut stream) => {
                 let _ = stream.set_read_timeout(Some(Duration::from_secs(3)));
-                let cid = format!("MerkeziIzlem_{}", crate::license::now_unix());
+                let cid = format!("WardTelemetryMonitor_{}", crate::license::now_unix());
                 if stream.write_all(&build_connect_packet(&cid)).is_err() {
                     continue;
                 }
@@ -158,7 +158,7 @@ pub fn spawn_mqtt_worker(state: Arc<Mutex<StateStore>>, cfg: AppConfig) {
                                     if pl_start <= body.len() {
                                         let payload = String::from_utf8_lossy(&body[pl_start..]).to_string();
                                         if let Ok(mut st) = state.lock() {
-                                            st.handle_hl7_message(&topic, &payload);
+                                            st.handle_telemetry_message(&topic, &payload);
                                         }
                                     }
                                 }
