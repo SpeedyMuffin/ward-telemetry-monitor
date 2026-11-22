@@ -2,6 +2,11 @@
 
 [English](#english) · [Türkçe](#türkçe)
 
+<p align="center">
+  <img src="docs/dashboard-en.png" width="49%" alt="Ward Telemetry Monitor (EN)" />
+  <img src="docs/dashboard-tr.png" width="49%" alt="Ward Telemetry Monitor (TR)" />
+</p>
+
 ---
 
 <a id="english"></a>
