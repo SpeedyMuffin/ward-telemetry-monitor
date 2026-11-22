@@ -1017,3 +1017,114 @@ body {
     color: var(--text-muted);
     font-family: var(--font-num);
 }
+
+/* ADMIN PANEL */
+.admin-login-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 55vh;
+    padding: 20px;
+}
+
+.admin-login-card {
+    width: 440px;
+    max-width: 95vw;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 24px;
+}
+
+.admin-login-card h2 {
+    font-size: 1.05rem;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+.admin-default-hint {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background-color: rgba(217, 119, 6, 0.14);
+    border: 1px solid var(--st-warn);
+    border-radius: 3px;
+    color: #fcd34d;
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-warn-banner {
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background-color: rgba(217, 119, 6, 0.15);
+    border: 1px solid var(--st-warn);
+    border-radius: 3px;
+    color: #fcd34d;
+    font-size: 0.78rem;
+}
+
+.admin-subtabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+}
+
+.admin-subtab {
+    background-color: #161d27;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 7px 14px;
+    border-radius: 3px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-subtab:hover {
+    background-color: #1e2734;
+    color: var(--text-main);
+}
+
+.admin-subtab.active {
+    background-color: var(--accent-blue);
+    border-color: #3b8ad1;
+    color: #ffffff;
+}
+
+.admin-pane {
+    display: block;
+}
+
+.admin-feedback {
+    margin-top: 8px;
+    font-size: 0.78rem;
+    min-height: 18px;
+}
+
+.admin-feedback.ok {
+    color: #4ade80;
+}
+
+.admin-feedback.err {
+    color: #f87171;
+}

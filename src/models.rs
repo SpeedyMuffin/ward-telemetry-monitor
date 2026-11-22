@@ -160,6 +160,8 @@ pub struct BedSnapshot {
 #[derive(Debug, Clone, Serialize)]
 pub struct FullSnapshot {
     pub server_time: String,
+    pub facility_name: String,
+    pub department_name: String,
     pub connected_to_xml: bool,
     pub connected_to_mqtt: bool,
     pub license: LicenseStatus,
@@ -193,6 +195,7 @@ pub fn default_drug_library() -> Vec<DrugRule> {
 pub struct StateStore {
     pub connected_to_xml: bool,
     pub connected_to_mqtt: bool,
+    pub admin: crate::admin::AdminState,
     pub structure: WardStructureFile,
     pub pumps: HashMap<String, PumpState>,
     pub mappings: Vec<DeviceMapping>,
@@ -250,10 +253,12 @@ impl StateStore {
             }
         }
         let license_status = license::get_license_status(true);
+        let admin = crate::admin::AdminState::load_or_init();
 
         let mut s = Self {
             connected_to_xml: false,
             connected_to_mqtt: false,
+            admin,
             structure,
             pumps: HashMap::new(),
             mappings,
@@ -402,6 +407,8 @@ impl StateStore {
         if !self.license_status.valid {
             return FullSnapshot {
                 server_time: time_str,
+                facility_name: self.admin.settings.facility_name.clone(),
+                department_name: self.admin.settings.department_name.clone(),
                 connected_to_xml: self.connected_to_xml,
                 connected_to_mqtt: self.connected_to_mqtt,
                 license: self.license_status.clone(),
@@ -466,6 +473,8 @@ impl StateStore {
 
         FullSnapshot {
             server_time: time_str,
+            facility_name: self.admin.settings.facility_name.clone(),
+            department_name: self.admin.settings.department_name.clone(),
             connected_to_xml: self.connected_to_xml,
             connected_to_mqtt: self.connected_to_mqtt,
             license: self.license_status.clone(),

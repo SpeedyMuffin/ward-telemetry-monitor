@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod admin;
 mod config;
 mod license;
 mod models;
@@ -121,6 +122,24 @@ struct PatientReq {
     note: String,
 }
 
+#[derive(Deserialize)]
+struct AdminLoginReq {
+    password: String,
+}
+
+#[derive(Deserialize)]
+struct AdminPasswordReq {
+    current_password: String,
+    new_password: String,
+}
+
+#[derive(Deserialize)]
+struct AdminSettingsReq {
+    facility_name: String,
+    #[serde(default)]
+    department_name: String,
+}
+
 #[derive(Serialize)]
 struct ErrorDetail {
     detail: String,
@@ -151,6 +170,26 @@ struct ReportsSummary {
 
 fn lock_state(state: &Arc<Mutex<StateStore>>) -> std::sync::MutexGuard<'_, StateStore> {
     state.lock().unwrap_or_else(|e| e.into_inner())
+}
+
+fn extract_admin_token(req: &Request) -> Option<String> {
+    req.headers()
+        .iter()
+        .find(|h| h.field.equiv("X-Admin-Token"))
+        .map(|h| h.value.as_str().trim().to_string())
+        .filter(|s| !s.is_empty())
+}
+
+fn admin_unauth_resp() -> Response<std::io::Cursor<Vec<u8>>> {
+    json_resp(
+        &ErrorDetail { detail: "Bu işlem için yönetici girişi gereklidir.".into() },
+        401,
+    )
+}
+
+fn require_admin(req: &Request, state: &Arc<Mutex<StateStore>>) -> bool {
+    let token = extract_admin_token(req);
+    lock_state(state).admin.is_authenticated(token.as_deref())
 }
 
 fn handle_request(mut req: Request, state: &Arc<Mutex<StateStore>>) {
@@ -204,8 +243,129 @@ fn handle_request(mut req: Request, state: &Arc<Mutex<StateStore>>) {
         return;
     }
 
-    // 3. Rooms & Beds Management (Self-service by hospital users)
+    // 2.5 Admin Auth & Facility Settings
+    if method == Method::Get && path == "/api/admin/status" {
+        let token = extract_admin_token(&req);
+        let mut g = lock_state(state);
+        let authenticated = g.admin.is_authenticated(token.as_deref());
+        let _ = req.respond(json_resp(
+            &serde_json::json!({
+                "authenticated": authenticated,
+                "using_default_password": g.admin.settings.using_default_password,
+                "facility_name": g.admin.settings.facility_name,
+                "department_name": g.admin.settings.department_name,
+            }),
+            200,
+        ));
+        return;
+    }
+    if method == Method::Post && path == "/api/admin/login" {
+        let body = read_body(&mut req);
+        if let Ok(parsed) = serde_json::from_str::<AdminLoginReq>(&body) {
+            let mut g = lock_state(state);
+            match g.admin.login(&parsed.password) {
+                Ok(token) => {
+                    g.log_event("SİSTEM", "ADMİN", "ADMIN_LOGIN", "INFO", "Yönetici oturumu açıldı.", 0.0, 0.0);
+                    let _ = req.respond(json_resp(
+                        &serde_json::json!({
+                            "ok": true,
+                            "token": token,
+                            "using_default_password": g.admin.settings.using_default_password,
+                            "facility_name": g.admin.settings.facility_name,
+                            "department_name": g.admin.settings.department_name,
+                        }),
+                        200,
+                    ));
+                }
+                Err(msg) => {
+                    g.log_event("SİSTEM", "ADMİN", "ADMIN_LOGIN_FAIL", "HIGH", msg, 0.0, 0.0);
+                    let code = if msg.contains("bekleyin") { 429 } else { 401 };
+                    let _ = req.respond(json_resp(&ErrorDetail { detail: msg.into() }, code));
+                }
+            }
+            return;
+        }
+        let _ = req.respond(json_resp(&ErrorDetail { detail: "Geçersiz JSON".into() }, 400));
+        return;
+    }
+    if method == Method::Post && path == "/api/admin/logout" {
+        let token = extract_admin_token(&req);
+        let mut g = lock_state(state);
+        if g.admin.is_authenticated(token.as_deref()) {
+            g.admin.logout(token.as_deref());
+            g.log_event("SİSTEM", "ADMİN", "ADMIN_LOGOUT", "INFO", "Yönetici oturumu kapatıldı.", 0.0, 0.0);
+        }
+        let _ = req.respond(json_resp(&serde_json::json!({"ok": true}), 200));
+        return;
+    }
+    if method == Method::Post && path == "/api/admin/settings" {
+        if !require_admin(&req, state) {
+            let _ = req.respond(admin_unauth_resp());
+            return;
+        }
+        let body = read_body(&mut req);
+        if let Ok(parsed) = serde_json::from_str::<AdminSettingsReq>(&body) {
+            let mut g = lock_state(state);
+            match g.admin.update_facility(&parsed.facility_name, &parsed.department_name) {
+                Ok(()) => {
+                    let fac = g.admin.settings.facility_name.clone();
+                    let dept = g.admin.settings.department_name.clone();
+                    g.log_event(
+                        "SİSTEM",
+                        "ADMİN",
+                        "ADMIN_SETTINGS_UPDATE",
+                        "INFO",
+                        &format!("Kurum ayarları güncellendi: {} / {}", fac, dept),
+                        0.0,
+                        0.0,
+                    );
+                    let _ = req.respond(json_resp(
+                        &serde_json::json!({
+                            "ok": true,
+                            "facility_name": fac,
+                            "department_name": dept,
+                        }),
+                        200,
+                    ));
+                }
+                Err(msg) => {
+                    let _ = req.respond(json_resp(&ErrorDetail { detail: msg.into() }, 400));
+                }
+            }
+            return;
+        }
+        let _ = req.respond(json_resp(&ErrorDetail { detail: "Geçersiz JSON".into() }, 400));
+        return;
+    }
+    if method == Method::Post && path == "/api/admin/password" {
+        if !require_admin(&req, state) {
+            let _ = req.respond(admin_unauth_resp());
+            return;
+        }
+        let body = read_body(&mut req);
+        if let Ok(parsed) = serde_json::from_str::<AdminPasswordReq>(&body) {
+            let mut g = lock_state(state);
+            match g.admin.change_password(&parsed.current_password, &parsed.new_password) {
+                Ok(new_token) => {
+                    g.log_event("SİSTEM", "ADMİN", "ADMIN_PASSWORD_CHANGED", "INFO", "Yönetici şifresi değiştirildi.", 0.0, 0.0);
+                    let _ = req.respond(json_resp(&serde_json::json!({"ok": true, "token": new_token}), 200));
+                }
+                Err(msg) => {
+                    let _ = req.respond(json_resp(&ErrorDetail { detail: msg.into() }, 400));
+                }
+            }
+            return;
+        }
+        let _ = req.respond(json_resp(&ErrorDetail { detail: "Geçersiz JSON".into() }, 400));
+        return;
+    }
+
+    // 3. Rooms & Beds Management (Admin protected)
     if method == Method::Post && path == "/api/rooms" {
+        if !require_admin(&req, state) {
+            let _ = req.respond(admin_unauth_resp());
+            return;
+        }
         let body = read_body(&mut req);
         if let Ok(parsed) = serde_json::from_str::<RoomCreateReq>(&body) {
             let mut g = lock_state(state);
@@ -224,6 +384,10 @@ fn handle_request(mut req: Request, state: &Arc<Mutex<StateStore>>) {
         }
     }
     if method == Method::Delete && path.starts_with("/api/rooms/") {
+        if !require_admin(&req, state) {
+            let _ = req.respond(admin_unauth_resp());
+            return;
+        }
         if let Ok(rid) = path["/api/rooms/".len()..].parse::<i64>() {
             let mut g = lock_state(state);
             let removed_beds: Vec<String> = g.structure.beds.iter().filter(|b| b.room_id == rid).map(|b| b.name.clone()).collect();
@@ -238,6 +402,10 @@ fn handle_request(mut req: Request, state: &Arc<Mutex<StateStore>>) {
         }
     }
     if method == Method::Post && path == "/api/beds" {
+        if !require_admin(&req, state) {
+            let _ = req.respond(admin_unauth_resp());
+            return;
+        }
         let body = read_body(&mut req);
         if let Ok(parsed) = serde_json::from_str::<BedCreateReq>(&body) {
             let mut g = lock_state(state);
@@ -278,10 +446,14 @@ fn handle_request(mut req: Request, state: &Arc<Mutex<StateStore>>) {
         }
     }
 
-    // Bed-specific actions: DELETE /api/beds/{name}, POST /api/beds/{name}/patient, POST /api/beds/{name}/reset_volume
+    // Bed-specific actions: DELETE /api/beds/{name} (admin), POST /api/beds/{name}/patient, POST /api/beds/{name}/reset_volume
     if path.starts_with("/api/beds/") {
         let rest = &path["/api/beds/".len()..];
         if method == Method::Delete && !rest.contains('/') {
+            if !require_admin(&req, state) {
+                let _ = req.respond(admin_unauth_resp());
+                return;
+            }
             let bname = url_decode(rest);
             let mut g = lock_state(state);
             g.structure.beds.retain(|b| b.name != bname);
@@ -331,13 +503,17 @@ fn handle_request(mut req: Request, state: &Arc<Mutex<StateStore>>) {
         }
     }
 
-    // 4. Mappings
+    // 4. Mappings (writes require Admin)
     if method == Method::Get && path == "/api/mappings" {
         let g = lock_state(state);
         let _ = req.respond(json_resp(&g.mappings, 200));
         return;
     }
     if method == Method::Post && path == "/api/mappings" {
+        if !require_admin(&req, state) {
+            let _ = req.respond(admin_unauth_resp());
+            return;
+        }
         let body = read_body(&mut req);
         if let Ok(mreq) = serde_json::from_str::<MappingReq>(&body) {
             let mut g = lock_state(state);
@@ -373,6 +549,10 @@ fn handle_request(mut req: Request, state: &Arc<Mutex<StateStore>>) {
         }
     }
     if method == Method::Delete && path.starts_with("/api/mappings/") {
+        if !require_admin(&req, state) {
+            let _ = req.respond(admin_unauth_resp());
+            return;
+        }
         let bname = url_decode(&path["/api/mappings/".len()..]);
         let mut g = lock_state(state);
         g.mappings.retain(|m| m.bed_name != bname);
@@ -383,13 +563,17 @@ fn handle_request(mut req: Request, state: &Arc<Mutex<StateStore>>) {
         return;
     }
 
-    // 5. Drugs
+    // 5. Drugs (writes require Admin)
     if method == Method::Get && path == "/api/drugs" {
         let g = lock_state(state);
         let _ = req.respond(json_resp(&g.drug_library, 200));
         return;
     }
     if method == Method::Post && path == "/api/drugs" {
+        if !require_admin(&req, state) {
+            let _ = req.respond(admin_unauth_resp());
+            return;
+        }
         let body = read_body(&mut req);
         if let Ok(dreq) = serde_json::from_str::<DrugReq>(&body) {
             let mut g = lock_state(state);
@@ -413,6 +597,10 @@ fn handle_request(mut req: Request, state: &Arc<Mutex<StateStore>>) {
         }
     }
     if method == Method::Delete && path.starts_with("/api/drugs/") {
+        if !require_admin(&req, state) {
+            let _ = req.respond(admin_unauth_resp());
+            return;
+        }
         let did = url_decode(&path["/api/drugs/".len()..]);
         let mut g = lock_state(state);
         g.drug_library.retain(|d| d.id != did);

@@ -3,6 +3,7 @@ config.json
 license.dat
 signing_key.secret
 uretilen_lisanslar.txt
+admin_settings.json
 .sys_state.dat
 structure.json
 mappings.json
