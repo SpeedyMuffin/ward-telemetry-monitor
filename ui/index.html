@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MERKEZİ İZLEM</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <!-- TAM EKRAN DONANIM LİSANS KİLİDİ -->
+    <div class="license-lock-overlay" id="licenseLockOverlay" style="display: none;">
+        <div class="license-lock-card">
+            <div class="lock-header-tag">ERİŞİM KİLİTLİ</div>
+            <h2>MERKEZİ İZLEM — LİSANS DOĞRULAMA</h2>
+            <p class="lock-reason-text" id="lockReasonText">Lisans doğrulanıyor...</p>
+
+            <div class="hwid-display-box">
+                <span class="hwid-label">CİHAZ DONANIM KİMLİĞİ (HWID)</span>
+                <div class="hwid-code-row">
+                    <code id="lockHwidCode">---</code>
+                    <button type="button" class="btn-ctrl btn-accent" id="btnCopyHwid">KOPYALA</button>
+                </div>
+            </div>
+
+            <form id="unlockLicenseForm" class="lock-form">
+                <label>LİSANS ANAHTARI (WTMKEY-...)</label>
+                <textarea id="unlockKeyInput" rows="3" placeholder="Aktivasyon anahtarını giriniz..." required></textarea>
+                <button type="submit" class="btn-ctrl btn-accent btn-unlock">LİSANSI ETKİNLEŞTİR</button>
+            </form>
+
+            <div class="lock-footer-contact">
+                <span>Ekrandaki Cihaz Kodu (HWID) lisans üreticisine yapıştırılarak aktivasyon anahtarı üretilir.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÜST PANEL -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="brand-block">
+                <div class="brand-mark">M</div>
+                <div>
+                    <h1 class="brand-title">MERKEZİ İZLEM</h1>
+                    <p class="brand-sub">İNFÜZYON İZLEM VE KONTROL SİSTEMİ</p>
+                </div>
+            </div>
+
+            <div class="conn-group">
+                <div class="status-tag disconnected" id="backendStatusPill" title="TCP/XML Köprü Bağlantısı (config.json)">
+                    <span class="ind-dot"></span>
+                    <span id="backendStatusText">XML KÖPRÜ: KAPALI</span>
+                </div>
+                <div class="status-tag disconnected" id="mqttStatusPill" title="MQTT Broker Bağlantısı (config.json)">
+                    <span class="ind-dot"></span>
+                    <span id="mqttStatusText">MQTT: BEKLİYOR</span>
+                </div>
+                <div class="status-tag" id="comStatusPill" title="Doğrudan Seri Port (COM)">
+                    <span class="ind-dot"></span>
+                    <span id="comStatusText">COM PORT: 0 AKTİF</span>
+                </div>
+                <button class="status-tag license-tag" id="btnLicenseBadge" title="Donanım Lisans Bilgisi">
+                    <span id="licenseBadgeText">LİSANS: KONTROL</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="alarm-box normal" id="alarmPill">
+                <span id="alarmCountText">0 ALARM</span>
+                <button class="btn-mute" id="btnAudioMute" title="Sesli Alarm Aç/Kapat">SES: AÇIK</button>
+            </div>
+
+            <button class="btn-ctrl btn-accent" id="btnOpenWardMgr">+ SERVİS / YATAK EKLE</button>
+            <button class="btn-ctrl btn-primary-solid" id="btnOpenDeviceMgr">CİHAZ TANITMA</button>
+
+            <div class="clock-display">
+                <span class="clock-time" id="digitalClock">--:--:--</span>
+                <span class="clock-date" id="digitalDate">--.--.----</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MODÜL SEKMELERİ VE ODA FİLTRESİ -->
+    <nav class="module-nav-bar">
+        <div class="module-tabs" id="moduleTabs">
+            <button class="mod-tab active" data-view="ward">SERVİS İZLEM</button>
+            <button class="mod-tab" data-view="map">YERLEŞİM PLANI</button>
+            <button class="mod-tab" data-view="drugs">İLAÇ KÜTÜPHANESİ (DERS)</button>
+            <button class="mod-tab" data-view="history">OLAY KAYITLARI</button>
+            <button class="mod-tab" data-view="reports">KLİNİK RAPORLAR</button>
+        </div>
+
+        <div class="room-tabs" id="roomTabs">
+            <button class="room-tab active" data-room="ALL">TÜMÜ <span class="tab-badge" id="totalBedsBadge">0</span></button>
+        </div>
+    </nav>
+
+    <!-- AKTİF ALARM ŞERİDİ -->
+    <div class="alarms-banner-container" id="alarmsBanner" style="display: none;">
+        <div class="alarms-banner-content">
+            <span class="alarm-prefix">AKTİF ALARM:</span>
+            <div class="alarm-text-list" id="alarmBannerList"></div>
+        </div>
+    </div>
+
+    <!-- ANA İÇERİK -->
+    <main class="dashboard-main">
+        <!-- GÖRÜNÜM 1: SERVİS İZLEM -->
+        <div class="view-section active" id="view-ward">
+            <div class="rooms-container" id="roomsContainer"></div>
+        </div>
+
+        <!-- GÖRÜNÜM 2: YERLEŞİM PLANI -->
+        <div class="view-section" id="view-map" style="display: none;">
+            <div class="section-panel">
+                <div class="panel-header-bar">
+                    <div>
+                        <h2>SERVİS YERLEŞİM PLANI</h2>
+                        <p class="section-desc">Tanımlı yatakların konumları ve anlık infüzyon durumları. Detay için yatağa tıklayın.</p>
+                    </div>
+                    <button class="btn-ctrl btn-accent" onclick="window.app.openWardMgrModal()">SERVİS / YATAK DÜZENLE</button>
+                </div>
+                <div class="ward-floor-canvas" id="wardFloorCanvas"></div>
+            </div>
+        </div>
+
+        <!-- GÖRÜNÜM 3: İLAÇ KÜTÜPHANESİ (DERS) -->
+        <div class="view-section" id="view-drugs" style="display: none;">
+            <div class="section-panel">
+                <div class="panel-header-bar">
+                    <div>
+                        <h2>İLAÇ KÜTÜPHANESİ VE DOZ LİMİTLERİ (DERS)</h2>
+                        <p class="section-desc">Canlı cihazlardan gelen infüzyon hızları bu tablodaki alt ve üst sınırlarla otomatik denetlenir.</p>
+                    </div>
+                    <button class="btn-ctrl btn-primary-solid" id="btnOpenAddDrugModal">+ İLAÇ KURALI EKLE</button>
+                </div>
+                <div class="table-container">
+                    <table class="clinical-table">
+                        <thead>
+                            <tr>
+                                <th>İLAÇ ADI</th>
+                                <th>KATEGORİ</th>
+                                <th>KONSANTRASYON</th>
+                                <th>SOFT MİN</th>
+                                <th>SOFT MAX</th>
+                                <th>HARD MAX</th>
+                                <th>BİRİM</th>
+                                <th>İŞLEM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drugsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GÖRÜNÜM 4: OLAY VE ALARM KAYITLARI -->
+        <div class="view-section" id="view-history" style="display: none;">
+            <div class="section-panel">
+                <div class="panel-header-bar">
+                    <div>
+                        <h2>GERÇEK OLAY VE ALARM ARŞİVİ</h2>
+                        <p class="section-desc">Cihaz bağlantıları, pompa durum değişimleri, alarmlar ve hasta kayıt hareketleri.</p>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <select id="historySeverityFilter" class="compact-select">
+                            <option value="ALL">TÜM KAYITLAR</option>
+                            <option value="HIGH">KRİTİK ALARMLAR</option>
+                            <option value="INFO">SİSTEM BİLGİLERİ</option>
+                        </select>
+                        <button class="btn-ctrl" id="btnRefreshHistory">YENİLE</button>
+                        <a class="btn-ctrl btn-primary-solid" href="/api/history/export_csv" style="text-decoration: none;">CSV DIŞA AKTAR</a>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="clinical-table">
+                        <thead>
+                            <tr>
+                                <th>TARİH / SAAT</th>
+                                <th>YATAK</th>
+                                <th>CİHAZ / PORT</th>
+                                <th>OLAY</th>
+                                <th>SEVİYE</th>
+                                <th>AÇIKLAMA</th>
+                                <th>HIZ</th>
+                                <th>HACİM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GÖRÜNÜM 5: KLİNİK RAPORLAR -->
+        <div class="view-section" id="view-reports" style="display: none;">
+            <div class="section-panel">
+                <div class="panel-header-bar">
+                    <div>
+                        <h2>KLİNİK SIVI DENGESİ VE CQI RAPORLARI</h2>
+                        <p class="section-desc">Yalnızca bağlı aktif gerçek pompalardan hesaplanan servis geneli veriler.</p>
+                    </div>
+                    <button class="btn-ctrl btn-primary-solid" id="btnRefreshReports">RAPORU YENİLE</button>
+                </div>
+                <div id="reportsContainer"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL 1: SERVİS & YATAK YÖNETİMİ (KENDİLERİ EKLESİN) -->
+    <div class="modal-backdrop" id="wardMgrModal" style="display: none;">
+        <div class="modal-card modal-card-wide">
+            <div class="modal-header">
+                <div class="modal-header-title">
+                    <h3>SERVİS VE YATAK TANIMLAMA</h3>
+                    <p class="modal-header-sub">Hastane birimlerini (oda/servis) ve yatak numaralarını manuel oluşturun veya kaldırın</p>
+                </div>
+                <button class="modal-close" id="btnCloseWardMgrModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="bed-detail-grid">
+                    <div class="report-box">
+                        <h4 style="margin-bottom: 10px; color: #38bdf8;">1. YENİ SERVİS / ODA EKLE</h4>
+                        <form id="addRoomForm" class="modal-form">
+                            <div class="form-row">
+                                <label>Servis / Oda Adı:</label>
+                                <input type="text" id="newRoomNameInput" placeholder="Örn: Anestezi Yoğun Bakım 1" required>
+                            </div>
+                            <button type="submit" class="btn-ctrl btn-primary-solid">+ SERVİS EKLE</button>
+                        </form>
+                        <hr style="border-color: #1e293b; margin: 16px 0;">
+                        <h4 style="margin-bottom: 10px; color: #38bdf8;">2. YENİ YATAK EKLE</h4>
+                        <form id="addBedForm" class="modal-form">
+                            <div class="form-row">
+                                <label>Bağlı Olduğu Servis:</label>
+                                <select id="newBedRoomSelect" required></select>
+                            </div>
+                            <div class="form-row">
+                                <label>Yatak Kodu / Adı:</label>
+                                <input type="text" id="newBedNameInput" placeholder="Örn: 01, YATAK-01, YB-04" required>
+                            </div>
+                            <button type="submit" class="btn-ctrl btn-accent">+ YATAK EKLE</button>
+                        </form>
+                    </div>
+                    <div class="report-box">
+                        <h4 style="margin-bottom: 10px; color: #38bdf8;">TANIMLI SERVİS VE YATAKLAR</h4>
+                        <div class="table-container" style="max-height: 360px; overflow-y: auto;">
+                            <table class="clinical-table">
+                                <thead>
+                                    <tr>
+                                        <th>SERVİS</th>
+                                        <th>YATAK</th>
+                                        <th>İŞLEM</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wardBedsManageBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CİHAZ & PORT TANITMA (4 GERÇEK YÖNTEM) -->
+    <div class="modal-backdrop" id="deviceMgrModal" style="display: none;">
+        <div class="modal-card modal-card-wide">
+            <div class="modal-header">
+                <div class="modal-header-title">
+                    <h3>CİHAZ VE BAĞLANTI TANITMA MERKEZİ</h3>
+                    <p class="modal-header-sub">Yataklara Uç Ağ Geçidi (Edge Gateway), Doğrudan Bilgisayar COM Portu, LAN Dok veya Pompa Seri No bağlayın</p>
+                </div>
+                <button class="modal-close" id="btnCloseDeviceMgrModal">&times;</button>
+            </div>
+
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-tab="active-mappings">AKTİF EŞLEŞTİRMELER (<span id="activeMappingsCount">0</span>)</button>
+                <button class="modal-tab" data-tab="add-mapping">+ CİHAZ / PORT BAĞLA</button>
+                <button class="modal-tab" data-tab="discovered-pis">AĞDAKİ RASPBERRY Pİ CİHAZLARI (<span id="discoveredPisCount">0</span>)</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="tab-pane active" id="pane-active-mappings">
+                    <div class="table-container">
+                        <table class="clinical-table">
+                            <thead>
+                                <tr>
+                                    <th>YATAK</th>
+                                    <th>YÖNTEM</th>
+                                    <th>ADRES / PORT</th>
+                                    <th>MODEL</th>
+                                    <th>ETİKET / İLAÇ</th>
+                                    <th>SON VERİ</th>
+                                    <th>DURUM</th>
+                                    <th>İŞLEM</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mappingsTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="modal-actions-bar">
+                        <button class="btn-ctrl btn-primary-solid" id="btnGoToAddNew">+ YENİ CİHAZ BAĞLA</button>
+                    </div>
+                </div>
+
+                <div class="tab-pane" id="pane-add-mapping" style="display: none;">
+                    <form id="saveMappingForm" class="modal-form">
+                        <div class="form-row grid-2">
+                            <div>
+                                <label>Hedef Yatak:</label>
+                                <select id="mapBedSelect" required></select>
+                            </div>
+                            <div>
+                                <label>Fiziksel Bağlantı Yöntemi:</label>
+                                <select id="mapSourceTypeSelect" required>
+                                    <option value="PI_IP">[GW] Uç Ağ Geçidi (IP / Port 1-4)</option>
+                                    <option value="DIRECT_COM">[COM] Doğrudan PC USB/RS232 Portu (Örn: COM3)</option>
+                                    <option value="DOCK_IP">[DOK] LAN Dok İstasyonu (TCP/XML)</option>
+                                    <option value="PUMP_SN">[SN] Fiziksel Pompa Seri Numarası</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <label id="lblMapAddress">Kaynak Adresi (Örn: 192.168.1.50 veya 192.168.1.50:PORT1):</label>
+                            <input type="text" id="mapAddressInput" placeholder="192.168.1.50 veya COM3" required>
+                            <small class="form-hint" id="hintMapAddress">
+                                Tekli ağ geçidi için sadece IP (192.168.1.50), çoklu port için IP:PORT yazabilir ya da ağ geçidi üzerinden PV1 yatak kodu gönderebilirsiniz.
+                                Bilgisayara doğrudan USB kablosuyla bağlı tek pompa için COM3 gibi port adını girin.
+                            </small>
+                        </div>
+
+                        <div class="form-row grid-2">
+                            <div>
+                                <label>Pompa Modeli:</label>
+                                <select id="mapModelSelect">
+                                    <option value="Enjektör Pompası">Enjektör Pompası</option>
+                                    <option value="Volumetrik Pompa">Volumetrik Pompa</option>
+                                    <option value="PCA Pompası">PCA Pompası</option>
+                                    <option value="Çok Kanallı Pompa">Çok Kanallı Pompa</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Bağlantı Etiketi:</label>
+                                <input type="text" id="mapLabelInput" placeholder="Örn: Yatak 1 Pompa Hattı">
+                            </div>
+                        </div>
+
+                        <div class="form-row grid-2">
+                            <div>
+                                <label>İlaç Adı:</label>
+                                <input type="text" id="mapDrugName" placeholder="Örn: Noradrenalin">
+                            </div>
+                            <div>
+                                <label>Konsantrasyon / Doz:</label>
+                                <input type="text" id="mapDrugConc" placeholder="Örn: 4 mg / 50 ml">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn-ctrl" id="btnCancelMapping">VAZGEÇ</button>
+                            <button type="submit" class="btn-ctrl btn-primary-solid">KAYDET VE YATAĞA BAĞLA</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-pane" id="pane-discovered-pis" style="display: none;">
+                    <p class="section-desc">Yapılandırılmış MQTT Broker üzerinden (<code>hl7/#</code>) aktif veri gönderen cihazlar:</p>
+                    <div class="table-container">
+                        <table class="clinical-table">
+                            <thead>
+                                <tr>
+                                    <th>Pİ IP / KANAL</th>
+                                    <th>SON SİNYAL</th>
+                                    <th>SINIFLANDIRMA</th>
+                                    <th>SON HL7 ÖZETİ</th>
+                                    <th>BAĞLI YATAK</th>
+                                    <th>İŞLEM</th>
+                                </tr>
+                            </thead>
+                            <tbody id="discoveredPisTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: YATAK DETAYI VE HASTA YÖNETİMİ -->
+    <div class="modal-backdrop" id="bedDetailModal" style="display: none;">
+        <div class="modal-card modal-card-wide">
+            <div class="modal-header">
+                <div class="modal-header-title">
+                    <h3 id="bedDetailTitle">YATAK BAŞI İSTASYONU</h3>
+                    <p class="modal-header-sub" id="bedDetailSub">Hasta bilgileri ve cihaz kanalları</p>
+                </div>
+                <button class="modal-close" id="btnCloseBedDetailModal">&times;</button>
+            </div>
+            <div class="modal-body" id="bedDetailBody"></div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: İLAÇ KURALI EKLEME (DERS) -->
+    <div class="modal-backdrop" id="addDrugModal" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>DERS İLAÇ KURALI EKLE</h3>
+                <button class="modal-close" id="btnCloseAddDrugModal">&times;</button>
+            </div>
+            <form id="addDrugForm" class="modal-form">
+                <div class="form-row grid-2">
+                    <div>
+                        <label>İlaç Adı:</label>
+                        <input type="text" id="drugNameInput" placeholder="Örn: Adrenalin" required>
+                    </div>
+                    <div>
+                        <label>Kategori:</label>
+                        <input type="text" id="drugCategoryInput" value="Vazopressör">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>Standart Konsantrasyon:</label>
+                    <input type="text" id="drugConcInput" placeholder="Örn: 4 mg / 50 ml">
+                </div>
+                <div class="form-row grid-2">
+                    <div>
+                        <label>Soft Alt Limit (ml/h):</label>
+                        <input type="number" id="drugSoftMinInput" step="0.1" value="0.5" required>
+                    </div>
+                    <div>
+                        <label>Soft Üst Limit (ml/h):</label>
+                        <input type="number" id="drugSoftMaxInput" step="0.1" value="25.0" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>Hard Üst Limit (ml/h):</label>
+                    <input type="number" id="drugHardMaxInput" step="0.1" value="50.0" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-ctrl" id="btnCancelDrugModal">İPTAL</button>
+                    <button type="submit" class="btn-ctrl btn-primary-solid">KAYDET</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 5: LİSANS BİLGİSİ -->
+    <div class="modal-backdrop" id="licenseInfoModal" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>LİSANS VE DONANIM KİLİDİ</h3>
+                <button class="modal-close" id="btnCloseLicenseModal">&times;</button>
+            </div>
+            <div class="modal-body" id="licenseInfoBody"></div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-left">
+            <span>MERKEZİ İZLEM • MQTT / HL7 v2 • TCP/XML • DIRECT COM</span>
+        </div>
+        <div class="footer-right">
+            <span>DONANIM KİLİTLİ ENDÜSTRİYEL İZLEM İSTASYONU</span>
+        </div>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+[package]
+name = "ward_telemetry_monitor"
+version = "1.0.0"
+edition = "2021"
+
+[[bin]]
+name = "WardTelemetryMonitor"
+path = "src/main.rs"
+
+[[bin]]
+name = "WardMonitor_LicenseGen"
+path = "src/keygen_bin.rs"
+
+[dependencies]
+tiny_http = "0.12"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+hmac = "0.12"
+aes = "0.8"
+cbc = { version = "0.1", features = ["alloc"] }
+base64 = "0.22"
+ed25519-dalek = "2"
+getrandom = "0.2"
+winapi = { version = "0.3", features = ["sysinfoapi", "fileapi", "winreg", "winnt", "minwindef", "commapi", "handleapi", "winbase", "debugapi"] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

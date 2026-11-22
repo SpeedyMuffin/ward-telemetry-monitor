@@ -1,0 +1,11 @@
+/target
+config.json
+license.dat
+signing_key.secret
+uretilen_lisanslar.txt
+.sys_state.dat
+structure.json
+mappings.json
+patients.json
+event_history.json
+drug_library.json
